@@ -29,6 +29,15 @@
     "@typescript-eslint/no-unused-vars": ["error", {
       "argsIgnorePattern": "_"
     }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "no-console": "warn",
+    "camelcase": "off",
+    "import/prefer-default-export": "off",
+    "no-return-await": "warn",
+    "radix": "warn",
+    "no-shadow": "warn",
+    "@typescript-eslint/no-non-null-assertion": "warn",
     "import/extensions": [
       "error",
       "ignorePackages",
@@ -37,6 +46,14 @@
       }
     ]
   },
+  "overrides": [
+    {
+      "files": ["src/models/*.ts", "src/repositories/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ],
   "settings": {
     "import/resolver": {
       "typescript": {}

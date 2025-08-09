@@ -1,15 +1,13 @@
 import TipoAcoesService from '../../services/TipoAcoesService';
-import { testDataSource } from '../setup';
-import TipoAcoes from '../../models/TipoAcoes';
+import { getTestDataSource } from '../setup';
 import AppError from '../../errors/AppError';
 
 describe('TipoAcoesService', () => {
   let tipoAcoesService: TipoAcoesService;
 
   beforeEach(async () => {
-    tipoAcoesService = new TipoAcoesService(testDataSource);
-    // Limpar dados de teste
-    await testDataSource.synchronize(true); // Drop e recriar todas as tabelas
+    tipoAcoesService = new TipoAcoesService(getTestDataSource());
+    await getTestDataSource().synchronize(true); // Drop e recriar todas as tabelas
   });
 
   describe('create', () => {
