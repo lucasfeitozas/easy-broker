@@ -1,7 +1,6 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { AppDataSource } from '../database';
 import Lancamentos from '../models/Lancamentos';
 
-@EntityRepository(Lancamentos)
-class LancamentosRepository extends Repository<Lancamentos> {}
-
+export const LancamentosRepository = AppDataSource.getRepository(Lancamentos);
 export default LancamentosRepository;

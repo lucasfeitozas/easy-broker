@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build application
+      run: npm run build
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Changes
+          
+          - See [CHANGELOG.md](CHANGELOG.md) for detailed changes
+          
+          ## Docker Image
+          
+          ```bash
+          docker pull ${{ secrets.DOCKER_USERNAME }}/easy-broker:${{ github.ref_name }}
+          ```
+          
+          ## Installation
+          
+          ```bash
+          # Clone the repository
+          git clone https://github.com/${{ github.repository }}.git
+          cd easy-broker
+          
+          # Copy environment file
+          cp .env.example .env
+          
+          # Start with Docker Compose
+          docker-compose up -d
+          ```
+        draft: false
+        prerelease: false
+
+    - name: Build and push Docker image for release
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/easy-broker:${{ github.ref_name }}
+          ${{ secrets.DOCKER_USERNAME }}/easy-broker:latest

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      target: builder
+    ports:
+      - "3333:3333"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=easybroker123
+      - DB_DATABASE=easybroker_dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - easybroker-network
+    command: npm run dev:server
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: easybroker123
+      MYSQL_DATABASE: easybroker_dev
+      MYSQL_USER: easybroker
+      MYSQL_PASSWORD: easybroker123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    networks:
+      - easybroker-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  test:
+    build: 
+      context: .
+      target: builder
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - easybroker-network
+    command: npm test
+    profiles: ["test"]
+
+volumes:
+  mysql_dev_data:
+
+networks:
+  easybroker-network:
+    driver: bridge

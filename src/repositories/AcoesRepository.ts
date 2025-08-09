@@ -1,7 +1,6 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { AppDataSource } from '../database';
 import Acoes from '../models/Acoes';
 
-@EntityRepository(Acoes)
-class AcoesRepository extends Repository<Acoes> {}
-
+export const AcoesRepository = AppDataSource.getRepository(Acoes);
 export default AcoesRepository;

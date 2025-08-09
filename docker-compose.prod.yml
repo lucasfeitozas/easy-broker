@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: easy-broker-app-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-your_secure_password}
+      - DB_DATABASE=${DB_DATABASE:-easy_broker}
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - easy-broker-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mysql:
+    image: mysql:8.0
+    container_name: easy-broker-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-your_secure_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-easy_broker}
+      MYSQL_USER: ${DB_USERNAME:-app_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-your_secure_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - easy-broker-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-your_secure_password}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=128M
+      --max-connections=100
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+  nginx:
+    image: nginx:alpine
+    container_name: easy-broker-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - easy-broker-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  easy-broker-network:
+    driver: bridge

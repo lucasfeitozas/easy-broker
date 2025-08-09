@@ -1,7 +1,6 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { AppDataSource } from '../database';
 import Corretoras from '../models/Corretoras';
 
-@EntityRepository(Corretoras)
-class CorretorasRepository extends Repository<Corretoras> {}
-
+export const CorretorasRepository = AppDataSource.getRepository(Corretoras);
 export default CorretorasRepository;

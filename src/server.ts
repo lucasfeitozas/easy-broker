@@ -4,13 +4,19 @@ import cors from 'cors';
 import 'express-async-errors'; // pacote importado para possibilitar tratamento global de errors em rotas com async
 import AppError from './errors/AppError';
 import routes from './routes';
-import './database';
+import { initializeDatabase } from './database';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 // app.use('/files', express.static(uploadConfig.directory));
+
+// Health check endpoint
+app.get('/health', (request: Request, response: Response) => {
+  return response.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use(routes);
 
 app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
@@ -29,6 +35,18 @@ app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
   });
 });
 
-app.listen(3333, () => {
-  console.log('🚀 Server started on port 3333');
-});
+// Inicializar banco e depois iniciar servidor
+async function startServer() {
+  try {
+    await initializeDatabase();
+    const port = process.env.PORT || 3333;
+    app.listen(port, () => {
+      console.log(`🚀 Server started on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

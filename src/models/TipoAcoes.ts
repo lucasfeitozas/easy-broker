@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('tb_acoes_tipo')
 class TipoAcoes {
@@ -8,7 +8,13 @@ class TipoAcoes {
   @Column()
   nome: string;
 
-  @Column()
+  @Column({ nullable: true })
   descricao: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
 export default TipoAcoes;
