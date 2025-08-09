@@ -15,6 +15,7 @@ interface UpdateTipoAcaoDTO {
 
 class TipoAcoesService {
   private tipoAcoesRepository: Repository<TipoAcoes>;
+
   private dataSource: DataSource;
 
   constructor(dataSource?: DataSource) {
@@ -25,7 +26,7 @@ class TipoAcoesService {
   async create(data: CreateTipoAcaoDTO): Promise<TipoAcoes> {
     // Verificar se já existe um tipo de ação com o mesmo nome
     const tipoExistente = await this.tipoAcoesRepository.findOne({
-      where: { nome: data.nome.trim() }
+      where: { nome: data.nome.trim() },
     });
     if (tipoExistente) {
       throw new AppError('Já existe um tipo de ação com este nome', 400);
@@ -80,7 +81,7 @@ class TipoAcoesService {
     // Verificar se já existe um tipo de ação com o mesmo nome (se fornecido)
     if (data.nome) {
       const tipoExistente = await this.tipoAcoesRepository.findOne({
-        where: { nome: data.nome.trim() }
+        where: { nome: data.nome.trim() },
       });
       if (tipoExistente && tipoExistente.id !== id) {
         throw new AppError('Já existe um tipo de ação com este nome', 400);
@@ -94,7 +95,9 @@ class TipoAcoesService {
 
     Object.assign(tipoAcao, {
       ...(data.nome && { nome: data.nome.trim() }),
-      ...(data.descricao !== undefined && { descricao: data.descricao?.trim() }),
+      ...(data.descricao !== undefined && {
+        descricao: data.descricao?.trim(),
+      }),
     });
 
     return await this.tipoAcoesRepository.save(tipoAcao);
@@ -102,16 +105,18 @@ class TipoAcoesService {
 
   async delete(id: number): Promise<void> {
     const tipoAcao = await this.findById(id);
-    
+
     // Verificar se o tipo de ação possui ações associadas (apenas se não for teste)
     try {
       const acoesRepository = this.dataSource.getRepository('Acoes');
-      const acoesCount = await acoesRepository.count({ where: { tipo_acao_id: id } });
-      
+      const acoesCount = await acoesRepository.count({
+        where: { tipo_acao_id: id },
+      });
+
       if (acoesCount > 0) {
         throw new AppError(
           'Não é possível excluir o tipo de ação pois existem ações associadas',
-          400
+          400,
         );
       }
     } catch (error) {

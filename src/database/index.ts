@@ -9,16 +9,23 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE || 'acoes',
   synchronize: true, // Temporariamente true para criar as tabelas
   logging: ['query', 'error', 'schema', 'warn', 'info', 'log'], // Logging completo
-  entities: process.env.NODE_ENV === 'production' ? [
-    __dirname + '/../models/TipoAcoes.js',
-    __dirname + '/../models/Acoes.js', 
-    __dirname + '/../models/Corretoras.js',
-    __dirname + '/../models/Lancamentos.js'
-  ] : ['src/models/*.ts'],
-  migrations: process.env.NODE_ENV === 'production' ? [
-    __dirname + '/migrations/*.js'
-  ] : ['src/database/migrations/*.ts'],
-  subscribers: process.env.NODE_ENV === 'production' ? [__dirname + '/subscribers/*.js'] : ['src/database/subscribers/*.ts'],
+  entities:
+    process.env.NODE_ENV === 'production'
+      ? [
+          `${__dirname}/../models/TipoAcoes.js`,
+          `${__dirname}/../models/Acoes.js`,
+          `${__dirname}/../models/Corretoras.js`,
+          `${__dirname}/../models/Lancamentos.js`,
+        ]
+      : ['src/models/*.ts'],
+  migrations:
+    process.env.NODE_ENV === 'production'
+      ? [`${__dirname}/migrations/*.js`]
+      : ['src/database/migrations/*.ts'],
+  subscribers:
+    process.env.NODE_ENV === 'production'
+      ? [`${__dirname}/subscribers/*.js`]
+      : ['src/database/subscribers/*.ts'],
 });
 
 let isInitialized = false;

@@ -3,7 +3,11 @@ import { AppDataSource } from '../database';
 import Lancamentos, { TipoOperacao } from '../models/Lancamentos';
 import Acoes from '../models/Acoes';
 import Corretoras from '../models/Corretoras';
-import { CreateLancamentoDTO, UpdateLancamentoDTO, FiltroRelatorioDTO } from '../dtos/LancamentosDTO';
+import {
+  CreateLancamentoDTO,
+  UpdateLancamentoDTO,
+  FiltroRelatorioDTO,
+} from '../dtos/LancamentosDTO';
 import AppError from '../errors/AppError';
 
 interface RelatorioItem {
@@ -32,7 +36,9 @@ interface RelatorioMovimentacao {
 
 class LancamentosService {
   private lancamentosRepository: Repository<Lancamentos>;
+
   private acoesRepository: Repository<Acoes>;
+
   private corretorasRepository: Repository<Corretoras>;
 
   constructor() {
@@ -44,7 +50,7 @@ class LancamentosService {
   async create(data: CreateLancamentoDTO): Promise<Lancamentos> {
     // Validar se a ação existe
     const acao = await this.acoesRepository.findOne({
-      where: { id: data.acoesId }
+      where: { id: data.acoesId },
     });
     if (!acao) {
       throw new AppError('Ação não encontrada', 404);
@@ -52,7 +58,7 @@ class LancamentosService {
 
     // Validar se a corretora existe
     const corretora = await this.corretorasRepository.findOne({
-      where: { id: data.corretoraId }
+      where: { id: data.corretoraId },
     });
     if (!corretora) {
       throw new AppError('Corretora não encontrada', 404);
@@ -156,7 +162,7 @@ class LancamentosService {
     // Validar se a ação existe (se fornecida)
     if (data.acoesId) {
       const acao = await this.acoesRepository.findOne({
-        where: { id: data.acoesId }
+        where: { id: data.acoesId },
       });
       if (!acao) {
         throw new AppError('Ação não encontrada', 404);
@@ -166,7 +172,7 @@ class LancamentosService {
     // Validar se a corretora existe (se fornecida)
     if (data.corretoraId) {
       const corretora = await this.corretorasRepository.findOne({
-        where: { id: data.corretoraId }
+        where: { id: data.corretoraId },
       });
       if (!corretora) {
         throw new AppError('Corretora não encontrada', 404);
@@ -199,26 +205,33 @@ class LancamentosService {
     await this.lancamentosRepository.remove(lancamento);
   }
 
-  async gerarRelatorioPosicao(filtros?: FiltroRelatorioDTO): Promise<RelatorioPosicao> {
+  async gerarRelatorioPosicao(
+    filtros?: FiltroRelatorioDTO,
+  ): Promise<RelatorioPosicao> {
     const lancamentos = await this.findAll(filtros);
 
-    const posicoes = new Map<string, {
-      ticker: string;
-      nomeAcao: string;
-      corretora: string;
-      quantidade: number;
-      valorTotal: number;
-      operacoes: number;
-    }>();
+    const posicoes = new Map<
+      string,
+      {
+        ticker: string;
+        nomeAcao: string;
+        corretora: string;
+        quantidade: number;
+        valorTotal: number;
+        operacoes: number;
+      }
+    >();
 
     lancamentos.forEach(lancamento => {
       const key = `${lancamento.acao.ticker}-${lancamento.corretora.nome}`;
-      const quantidade = lancamento.operacao === TipoOperacao.COMPRA 
-        ? lancamento.quantidade 
-        : -lancamento.quantidade;
-      const valor = lancamento.operacao === TipoOperacao.COMPRA 
-        ? lancamento.valor * lancamento.quantidade
-        : -lancamento.valor * lancamento.quantidade;
+      const quantidade =
+        lancamento.operacao === TipoOperacao.COMPRA
+          ? lancamento.quantidade
+          : -lancamento.quantidade;
+      const valor =
+        lancamento.operacao === TipoOperacao.COMPRA
+          ? lancamento.valor * lancamento.quantidade
+          : -lancamento.valor * lancamento.quantidade;
 
       if (posicoes.has(key)) {
         const posicao = posicoes.get(key)!;
@@ -250,8 +263,14 @@ class LancamentosService {
       }))
       .sort((a, b) => b.valorTotalInvestido - a.valorTotalInvestido);
 
-    const totalInvestido = posicaoAtual.reduce((total, item) => total + item.valorTotalInvestido, 0);
-    const totalAcoes = posicaoAtual.reduce((total, item) => total + item.quantidadeTotal, 0);
+    const totalInvestido = posicaoAtual.reduce(
+      (total, item) => total + item.valorTotalInvestido,
+      0,
+    );
+    const totalAcoes = posicaoAtual.reduce(
+      (total, item) => total + item.quantidadeTotal,
+      0,
+    );
 
     return {
       posicaoAtual,
@@ -260,14 +279,22 @@ class LancamentosService {
     };
   }
 
-  async gerarRelatorioMovimentacao(filtros?: FiltroRelatorioDTO): Promise<RelatorioMovimentacao> {
+  async gerarRelatorioMovimentacao(
+    filtros?: FiltroRelatorioDTO,
+  ): Promise<RelatorioMovimentacao> {
     const lancamentos = await this.findAll(filtros);
 
     const compras = lancamentos.filter(l => l.operacao === TipoOperacao.COMPRA);
     const vendas = lancamentos.filter(l => l.operacao === TipoOperacao.VENDA);
 
-    const totalCompras = compras.reduce((total, compra) => total + (compra.valor * compra.quantidade), 0);
-    const totalVendas = vendas.reduce((total, venda) => total + (venda.valor * venda.quantidade), 0);
+    const totalCompras = compras.reduce(
+      (total, compra) => total + compra.valor * compra.quantidade,
+      0,
+    );
+    const totalVendas = vendas.reduce(
+      (total, venda) => total + venda.valor * venda.quantidade,
+      0,
+    );
 
     return {
       compras,

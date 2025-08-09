@@ -40,7 +40,7 @@ describe('TipoAcoesService', () => {
         tipoAcoesService.create({
           nome: 'Ação Ordinária',
           descricao: 'Segunda ação',
-        })
+        }),
       ).rejects.toBeInstanceOf(AppError);
     });
 
@@ -49,7 +49,7 @@ describe('TipoAcoesService', () => {
         tipoAcoesService.create({
           nome: '',
           descricao: 'Descrição',
-        })
+        }),
       ).rejects.toBeInstanceOf(AppError);
     });
   });
@@ -86,9 +86,9 @@ describe('TipoAcoesService', () => {
     });
 
     it('deve lançar erro quando tipo de ação não for encontrado', async () => {
-      await expect(
-        tipoAcoesService.findById(999)
-      ).rejects.toBeInstanceOf(AppError);
+      await expect(tipoAcoesService.findById(999)).rejects.toBeInstanceOf(
+        AppError,
+      );
     });
   });
 
@@ -113,7 +113,7 @@ describe('TipoAcoesService', () => {
       const tipo2 = await tipoAcoesService.create({ nome: 'Tipo 2' });
 
       await expect(
-        tipoAcoesService.update(tipo2.id, { nome: 'Tipo 1' })
+        tipoAcoesService.update(tipo2.id, { nome: 'Tipo 1' }),
       ).rejects.toBeInstanceOf(AppError);
     });
   });
@@ -127,14 +127,14 @@ describe('TipoAcoesService', () => {
       await tipoAcoesService.delete(tipoAcao.id);
 
       await expect(
-        tipoAcoesService.findById(tipoAcao.id)
+        tipoAcoesService.findById(tipoAcao.id),
       ).rejects.toBeInstanceOf(AppError);
     });
 
     it('deve lançar erro ao tentar excluir tipo inexistente', async () => {
-      await expect(
-        tipoAcoesService.delete(999)
-      ).rejects.toBeInstanceOf(AppError);
+      await expect(tipoAcoesService.delete(999)).rejects.toBeInstanceOf(
+        AppError,
+      );
     });
   });
 

@@ -26,14 +26,17 @@ tipoAcoesRouter.get('/search', async (request: Request, response: Response) => {
 });
 
 // GET /tipo-acoes/estatisticas - Estatísticas dos tipos de ações
-tipoAcoesRouter.get('/estatisticas', async (request: Request, response: Response) => {
-  try {
-    const estatisticas = await tipoAcoesService.getEstatisticas();
-    return response.json(estatisticas);
-  } catch (error) {
-    return response.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
+tipoAcoesRouter.get(
+  '/estatisticas',
+  async (request: Request, response: Response) => {
+    try {
+      const estatisticas = await tipoAcoesService.getEstatisticas();
+      return response.json(estatisticas);
+    } catch (error) {
+      return response.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  },
+);
 
 // GET /tipo-acoes/:id - Buscar tipo de ação por ID
 tipoAcoesRouter.get('/:id', async (request: Request, response: Response) => {

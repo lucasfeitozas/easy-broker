@@ -26,28 +26,34 @@ acoesRouter.get('/search', async (request: Request, response: Response) => {
 });
 
 // GET /acoes/estatisticas - Estatísticas das ações
-acoesRouter.get('/estatisticas', async (request: Request, response: Response) => {
-  try {
-    const estatisticas = await acoesService.getEstatisticas();
-    return response.json(estatisticas);
-  } catch (error) {
-    return response.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
+acoesRouter.get(
+  '/estatisticas',
+  async (request: Request, response: Response) => {
+    try {
+      const estatisticas = await acoesService.getEstatisticas();
+      return response.json(estatisticas);
+    } catch (error) {
+      return response.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  },
+);
 
 // GET /acoes/tipo/:tipoId - Buscar ações por tipo
-acoesRouter.get('/tipo/:tipoId', async (request: Request, response: Response) => {
-  try {
-    const { tipoId } = request.params;
-    const acoes = await acoesService.findByTipoAcao(Number(tipoId));
-    return response.json(acoes);
-  } catch (error: any) {
-    if (error.statusCode === 404) {
-      return response.status(404).json({ error: error.message });
+acoesRouter.get(
+  '/tipo/:tipoId',
+  async (request: Request, response: Response) => {
+    try {
+      const { tipoId } = request.params;
+      const acoes = await acoesService.findByTipoAcao(Number(tipoId));
+      return response.json(acoes);
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return response.status(404).json({ error: error.message });
+      }
+      return response.status(500).json({ error: 'Erro interno do servidor' });
     }
-    return response.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
+  },
+);
 
 // GET /acoes/:id - Buscar ação por ID
 acoesRouter.get('/:id', async (request: Request, response: Response) => {
@@ -64,18 +70,21 @@ acoesRouter.get('/:id', async (request: Request, response: Response) => {
 });
 
 // GET /acoes/ticker/:ticker - Buscar ação por ticker
-acoesRouter.get('/ticker/:ticker', async (request: Request, response: Response) => {
-  try {
-    const { ticker } = request.params;
-    const acao = await acoesService.findByTicker(ticker);
-    return response.json(acao);
-  } catch (error: any) {
-    if (error.statusCode === 404) {
-      return response.status(404).json({ error: error.message });
+acoesRouter.get(
+  '/ticker/:ticker',
+  async (request: Request, response: Response) => {
+    try {
+      const { ticker } = request.params;
+      const acao = await acoesService.findByTicker(ticker);
+      return response.json(acao);
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return response.status(404).json({ error: error.message });
+      }
+      return response.status(500).json({ error: 'Erro interno do servidor' });
     }
-    return response.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
+  },
+);
 
 // POST /acoes - Criar nova ação
 acoesRouter.post('/', async (request: Request, response: Response) => {

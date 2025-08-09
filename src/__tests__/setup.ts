@@ -15,7 +15,7 @@ beforeAll(async () => {
     logging: false,
     entities: [TipoAcoes, Corretoras, Acoes, Lancamentos],
   });
-  
+
   await testDataSource.initialize();
 });
 

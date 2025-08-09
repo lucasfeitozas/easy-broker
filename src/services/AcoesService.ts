@@ -7,6 +7,7 @@ import AppError from '../errors/AppError';
 
 class AcoesService {
   private acoesRepository: Repository<Acoes>;
+
   private tipoAcoesRepository: Repository<TipoAcoes>;
 
   constructor() {
@@ -17,7 +18,7 @@ class AcoesService {
   async create(data: CreateAcaoDTO): Promise<Acoes> {
     // Validar se o tipo de ação existe
     const tipoAcao = await this.tipoAcoesRepository.findOne({
-      where: { id: data.tipoAcaoId }
+      where: { id: data.tipoAcaoId },
     });
     if (!tipoAcao) {
       throw new AppError('Tipo de ação não encontrado', 404);
@@ -25,7 +26,7 @@ class AcoesService {
 
     // Verificar se já existe uma ação com o mesmo ticker
     const acaoExistente = await this.acoesRepository.findOne({
-      where: { ticker: data.ticker.toUpperCase() }
+      where: { ticker: data.ticker.toUpperCase() },
     });
     if (acaoExistente) {
       throw new AppError('Já existe uma ação com este ticker', 400);
@@ -85,7 +86,7 @@ class AcoesService {
 
   async findByTipoAcao(tipoAcaoId: number): Promise<Acoes[]> {
     const tipoAcao = await this.tipoAcoesRepository.findOne({
-      where: { id: tipoAcaoId }
+      where: { id: tipoAcaoId },
     });
     if (!tipoAcao) {
       throw new AppError('Tipo de ação não encontrado', 404);
@@ -104,7 +105,7 @@ class AcoesService {
     // Validar se o tipo de ação existe (se fornecido)
     if (data.tipoAcaoId) {
       const tipoAcao = await this.tipoAcoesRepository.findOne({
-        where: { id: data.tipoAcaoId }
+        where: { id: data.tipoAcaoId },
       });
       if (!tipoAcao) {
         throw new AppError('Tipo de ação não encontrado', 404);
@@ -114,7 +115,7 @@ class AcoesService {
     // Verificar se já existe uma ação com o mesmo ticker (se fornecido)
     if (data.ticker) {
       const acaoExistente = await this.acoesRepository.findOne({
-        where: { ticker: data.ticker.toUpperCase() }
+        where: { ticker: data.ticker.toUpperCase() },
       });
       if (acaoExistente && acaoExistente.id !== id) {
         throw new AppError('Já existe uma ação com este ticker', 400);
@@ -141,16 +142,16 @@ class AcoesService {
 
   async delete(id: number): Promise<void> {
     const acao = await this.findById(id);
-    
+
     // Verificar se a ação possui lançamentos associados
-    const lancamentosCount = await AppDataSource
-      .getRepository('Lancamentos')
-      .count({ where: { acoes_id: id } });
-    
+    const lancamentosCount = await AppDataSource.getRepository(
+      'Lancamentos',
+    ).count({ where: { acoes_id: id } });
+
     if (lancamentosCount > 0) {
       throw new AppError(
         'Não é possível excluir a ação pois existem lançamentos associados',
-        400
+        400,
       );
     }
 

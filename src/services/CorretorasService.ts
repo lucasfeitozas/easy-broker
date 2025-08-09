@@ -14,7 +14,7 @@ class CorretorasService {
   async create(data: CreateCorretoraDTO): Promise<Corretoras> {
     // Verificar se já existe uma corretora com o mesmo nome
     const corretoraExistente = await this.corretorasRepository.findOne({
-      where: { nome: data.nome.trim() }
+      where: { nome: data.nome.trim() },
     });
     if (corretoraExistente) {
       throw new AppError('Já existe uma corretora com este nome', 400);
@@ -23,7 +23,7 @@ class CorretorasService {
     // Verificar se já existe uma corretora com o mesmo CNPJ (se fornecido)
     if (data.cnpj) {
       const corretoraCnpjExistente = await this.corretorasRepository.findOne({
-        where: { cnpj: data.cnpj }
+        where: { cnpj: data.cnpj },
       });
       if (corretoraCnpjExistente) {
         throw new AppError('Já existe uma corretora com este CNPJ', 400);
@@ -90,7 +90,7 @@ class CorretorasService {
     // Verificar se já existe uma corretora com o mesmo nome (se fornecido)
     if (data.nome) {
       const corretoraExistente = await this.corretorasRepository.findOne({
-        where: { nome: data.nome.trim() }
+        where: { nome: data.nome.trim() },
       });
       if (corretoraExistente && corretoraExistente.id !== id) {
         throw new AppError('Já existe uma corretora com este nome', 400);
@@ -100,7 +100,7 @@ class CorretorasService {
     // Verificar se já existe uma corretora com o mesmo CNPJ (se fornecido)
     if (data.cnpj) {
       const corretoraCnpjExistente = await this.corretorasRepository.findOne({
-        where: { cnpj: data.cnpj }
+        where: { cnpj: data.cnpj },
       });
       if (corretoraCnpjExistente && corretoraCnpjExistente.id !== id) {
         throw new AppError('Já existe uma corretora com este CNPJ', 400);
@@ -127,16 +127,16 @@ class CorretorasService {
 
   async delete(id: number): Promise<void> {
     const corretora = await this.findById(id);
-    
+
     // Verificar se a corretora possui lançamentos associados
-    const lancamentosCount = await AppDataSource
-      .getRepository('Lancamentos')
-      .count({ where: { corretora_id: id } });
-    
+    const lancamentosCount = await AppDataSource.getRepository(
+      'Lancamentos',
+    ).count({ where: { corretora_id: id } });
+
     if (lancamentosCount > 0) {
       throw new AppError(
         'Não é possível excluir a corretora pois existem lançamentos associados',
-        400
+        400,
       );
     }
 
@@ -168,7 +168,11 @@ class CorretorasService {
 
     const corretorasComLancamentos = await this.corretorasRepository
       .createQueryBuilder('corretora')
-      .leftJoin('Lancamentos', 'lancamento', 'lancamento.corretora_id = corretora.id')
+      .leftJoin(
+        'Lancamentos',
+        'lancamento',
+        'lancamento.corretora_id = corretora.id',
+      )
       .where('lancamento.id IS NOT NULL')
       .getCount();
 
@@ -189,13 +193,21 @@ class CorretorasService {
   }> {
     const corretora = await this.findById(id);
 
-    const resumo = await AppDataSource
-      .getRepository('Lancamentos')
+    const resumo = await AppDataSource.getRepository('Lancamentos')
       .createQueryBuilder('lancamento')
       .select('COUNT(*)', 'totalOperacoes')
-      .addSelect('SUM(CASE WHEN operacao = "compra" THEN 1 ELSE 0 END)', 'totalCompras')
-      .addSelect('SUM(CASE WHEN operacao = "venda" THEN 1 ELSE 0 END)', 'totalVendas')
-      .addSelect('SUM(CASE WHEN operacao = "compra" THEN valor * quantidade ELSE -valor * quantidade END)', 'valorTotalInvestido')
+      .addSelect(
+        'SUM(CASE WHEN operacao = "compra" THEN 1 ELSE 0 END)',
+        'totalCompras',
+      )
+      .addSelect(
+        'SUM(CASE WHEN operacao = "venda" THEN 1 ELSE 0 END)',
+        'totalVendas',
+      )
+      .addSelect(
+        'SUM(CASE WHEN operacao = "compra" THEN valor * quantidade ELSE -valor * quantidade END)',
+        'valorTotalInvestido',
+      )
       .addSelect('MAX(dataLancamento)', 'ultimaOperacao')
       .where('corretora_id = :id', { id })
       .getRawOne();
@@ -206,7 +218,9 @@ class CorretorasService {
       totalCompras: parseInt(resumo.totalCompras) || 0,
       totalVendas: parseInt(resumo.totalVendas) || 0,
       valorTotalInvestido: parseFloat(resumo.valorTotalInvestido) || 0,
-      ultimaOperacao: resumo.ultimaOperacao ? new Date(resumo.ultimaOperacao) : undefined,
+      ultimaOperacao: resumo.ultimaOperacao
+        ? new Date(resumo.ultimaOperacao)
+        : undefined,
     };
   }
 }
